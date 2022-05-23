@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000
 app.use(cors());
 app.use(express.json());
 
-
+////////////////////
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -25,20 +25,13 @@ function verifyJWT(req, res, next) {
         next();
     });
 }
-
+////////////////////////
 
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.g84sa.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-/* 
-client.connect(err => {
-  const collection = client.db("test").collection("devices");
-  console.log('Mongodb is Connected')
-  // perform actions on the collection object
-  client.close();
-});
- */
+
 
 async function run(){
     try{
@@ -48,7 +41,7 @@ async function run(){
         const toolCollection = client.db('agriculture_manufacturer').collection('tools');
         const reviewCollection = client.db('agriculture_manufacturer').collection('reviews');
 
-
+/////////////////////////
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
             const requesterAccount = await userCollection.findOne({ email: requester });
@@ -59,7 +52,7 @@ async function run(){
                 res.status(403).send({ message: 'Forbidden' });
             }
         }
-
+//////////////////////////
 
         app.get('/tool', async(req, res) =>{
             const query = {};
@@ -67,18 +60,19 @@ async function run(){
             const tools = await cursor.toArray();
             res.send(tools);
         })
-
+////////////////////////////////
         app.post('/review', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
         })
-
-        app.get('/review',verifyJWT, async(req, res) =>{
-            const doctors = await reviewCollection.find().toArray();
-            res.send(doctors)
+/////////////////////////////////
+        app.get('/review', async(req, res) =>{
+            const review = await reviewCollection.find().toArray();
+            res.send(review)
 
         })
+        /////////////////////////////
     }
     finally{
 
