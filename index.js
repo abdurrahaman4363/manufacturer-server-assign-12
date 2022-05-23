@@ -28,6 +28,14 @@ async function run(){
        
         await client.connect();
         console.log('Mongodb is Connected');
+        const toolCollection = client.db('agriculture_manufacturer').collection('tools');
+
+        app.get('/tool', async(req, res) =>{
+            const query = {};
+            const cursor = toolCollection.find(query);
+            const tools = await cursor.toArray();
+            res.send(tools);
+        })
     }
     finally{
 
