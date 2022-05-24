@@ -83,6 +83,13 @@ async function run() {
 
         })
         ////////////////////////////
+        app.get('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const tool = await orderCollection.findOne(query);
+            res.send(tool);
+        })
+        ///////////////////////////
     }
     finally {
 
