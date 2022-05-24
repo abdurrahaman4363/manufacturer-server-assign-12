@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config();
 const app = express()
 const port = process.env.PORT || 5000
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // middleware  manufacturer_tools   H9T4M!34jyx-Pjy
 app.use(cors());
@@ -25,6 +26,7 @@ async function run() {
         const reviewCollection = client.db('agriculture_manufacturer').collection('reviews');
         const userCollection = client.db('agriculture_manufacturer').collection('users');
         const orderCollection = client.db('agriculture_manufacturer').collection('orders');
+        const profileCollection = client.db('agriculture_manufacturer').collection('profiles');
         
 
 
@@ -86,10 +88,40 @@ async function run() {
         app.get('/order/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const tool = await orderCollection.findOne(query);
-            res.send(tool);
+            const order = await orderCollection.findOne(query);
+            res.send(order);
         })
         ///////////////////////////
+        app.put('/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await profileCollection.updateOne(filter, updateDoc, options);
+           
+            res.send(result);
+        })
+        ////////////////////////////
+        app.post('/create-payment-intent', async(req, res)=>{
+            const service = req.body;
+            const price = service.price;
+            const amount = price*100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount : amount,
+                currency:'usd',
+                payment_method_types:['card']
+            });
+            res.send({clientSecret: paymentIntent.client_secret})
+
+
+        })
+        //////////////////////////
+
+        //////////////////////////
+
     }
     finally {
 
