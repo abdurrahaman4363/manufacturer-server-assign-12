@@ -1,5 +1,5 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const jwt = require('jsonwebtoken')
 require('dotenv').config();
@@ -24,6 +24,7 @@ async function run() {
         const toolCollection = client.db('agriculture_manufacturer').collection('tools');
         const reviewCollection = client.db('agriculture_manufacturer').collection('reviews');
         const userCollection = client.db('agriculture_manufacturer').collection('users');
+        const orderCollection = client.db('agriculture_manufacturer').collection('orders');
         
 
 
@@ -48,6 +49,13 @@ async function run() {
             const tools = await cursor.toArray();
             res.send(tools);
         })
+        /////////////////////////////////
+        app.get('/tool/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const tool = await toolCollection.findOne(query);
+            res.send(tool);
+        })
         ////////////////////////////////
         app.post('/review', async (req, res) => {
             const review = req.body;
@@ -59,6 +67,12 @@ async function run() {
             const review = await reviewCollection.find().toArray();
             res.send(review)
 
+        })
+        /////////////////////////////
+        app.post('/order', async (req, res) => {
+            const review = req.body;
+            const result = await orderCollection.insertOne(review);
+            res.send(result);
         })
         /////////////////////////////
     }
