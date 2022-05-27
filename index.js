@@ -141,6 +141,13 @@ async function run() {
             const result = await orderCollection.insertOne(review);
             res.send(result);
         })
+        ///////////////////////////////// 
+        app.get('/order',verifyJWT, async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
         /////////////////////////////
         app.get('/order',verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -163,6 +170,7 @@ async function run() {
             const order = await orderCollection.findOne(query);
             res.send(order);
         })
+       
         ///////////////////////////
         app.put('/profile/:email', async (req, res) => {
             const email = req.params.email;
