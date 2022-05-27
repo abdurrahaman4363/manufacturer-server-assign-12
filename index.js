@@ -49,11 +49,29 @@ async function run() {
 
   /////////////////////////////////////
 
-       app.get('/user', async(req, res) =>{
+       app.get('/user',verifyJWT, async(req, res) =>{
         const users = await userCollection.find().toArray();
         res.send(users);
        })
+       /////////////////////////////
 
+  app.put('/user/admin/:email',verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({email:requester})
+            if(requesterAccount.role === 'admin'){
+                const filter = { email: email };
+                const updateDoc = {
+                    $set: {role:'admin'},
+                };
+                const result = await userCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            }
+            else{
+                return res.status(403).send({ message: 'Forbidden access' }); 
+            }
+           
+        })
 
   ///////////////////////////////////
         app.put('/user/:email', async (req, res) => {
@@ -68,6 +86,13 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res.send({ result, token });
         })
+        //////////////////////////////////
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin });
+        })
 
         ////////////////////////////////
 
@@ -77,12 +102,26 @@ async function run() {
             const tools = await cursor.toArray();
             res.send(tools);
         })
+        ///////////////////////////////////
+        app.delete('/tool/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await toolCollection.deleteOne(query);
+            res.send(result);
+        })
+
         /////////////////////////////////
         app.get('/tool/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const tool = await toolCollection.findOne(query);
             res.send(tool);
+        })
+        ////////////////////////////
+        app.post('/tool', async (req, res) => {
+            const addItem = req.body;
+            const result = await toolCollection.insertOne(addItem);
+            res.send(result);
         })
         ////////////////////////////////
         app.post('/review', async (req, res) => {
@@ -149,6 +188,7 @@ async function run() {
         app.post('/create-payment-intent', async(req, res)=>{
             const service = req.body;
             const price = service.price;
+            console.log(price);
             const amount = price*100;
             const paymentIntent = await stripe.paymentIntents.create({
                 amount : amount,
