@@ -141,13 +141,7 @@ async function run() {
             const result = await orderCollection.insertOne(review);
             res.send(result);
         })
-        ///////////////////////////////// 
-        app.get('/order',verifyJWT, async (req, res) => {
-            const query = {};
-            const cursor = orderCollection.find(query);
-            const orders = await cursor.toArray();
-            res.send(orders);
-        })
+       
         /////////////////////////////
         app.get('/order',verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -162,6 +156,13 @@ async function run() {
             }
          
 
+        })
+         ///////////////////////////////// 
+         app.get('/order',verifyJWT, async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
         })
         ////////////////////////////
         app.get('/order/:id', async (req, res) => {
